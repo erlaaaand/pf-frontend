@@ -1,5 +1,4 @@
-// lib/jwt.ts
-
+// src/lib/jwt.ts
 export interface DecodedAccessToken {
   sub: string;
   email: string;
@@ -16,7 +15,6 @@ function base64UrlDecode(input: string): string {
   );
 
   if (typeof atob === 'function') {
-    // Browser & Edge Runtime
     return decodeURIComponent(
       atob(withPadding)
         .split('')
@@ -24,8 +22,6 @@ function base64UrlDecode(input: string): string {
         .join(''),
     );
   }
-
-  // Node.js fallback (mis. saat dites via jest/node script)
   return Buffer.from(withPadding, 'base64').toString('utf-8');
 }
 
@@ -46,9 +42,8 @@ export function decodeAccessToken(
   }
 }
 
-/** true jika token sudah lewat waktu `exp` (dengan toleransi 0 detik). */
 export function isTokenExpired(token: string | null | undefined): boolean {
   const decoded = decodeAccessToken(token);
-  if (!decoded?.exp) return false; // tidak tahu exp -> anggap belum expired, biar 401 dari backend yang tentukan
+  if (!decoded?.exp) return false;
   return Date.now() >= decoded.exp * 1000;
 }

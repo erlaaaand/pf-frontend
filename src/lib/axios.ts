@@ -4,30 +4,25 @@ import axios, {
   type AxiosInstance,
   type InternalAxiosRequestConfig,
 } from 'axios';
-
 import { API_BASE_URL } from './constants';
 
-const TOKEN_KEY = 'pf_access_token';
+// ── State CSRF ───────────────────────────────────────────────────────────
+let csrfToken: string | null = null;
 
-// ── Token Storage ─────────────────────────────────────────────────────────
-
-export function setAuthToken(token: string): void {
-  if (typeof window === 'undefined') return;
-  window.localStorage.setItem(TOKEN_KEY, token);
-}
-
-export function getAuthToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return window.localStorage.getItem(TOKEN_KEY);
-}
-
-export function clearAuthToken(): void {
-  if (typeof window === 'undefined') return;
-  window.localStorage.removeItem(TOKEN_KEY);
+// Fungsi untuk mengambil CSRF token terbaru dari backend
+export async function fetchCsrfToken(): Promise<void> {
+  try {
+    // Jangan gunakan instance 'api' agar tidak terjebak infinite loop
+    const { data } = await axios.get(`${API_BASE_URL}/csrf-token`, {
+      withCredentials: true,
+    });
+    csrfToken = data.csrfToken;
+  } catch (error) {
+    console.error('Gagal mengambil CSRF token:', error);
+  }
 }
 
 // ── Axios Instance ───────────────────────────────────────────────────────
-
 export const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
@@ -36,33 +31,31 @@ export const api: AxiosInstance = axios.create({
   },
 });
 
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (error.response?.status === 401) {
-      // Jika token kedaluwarsa atau tidak valid, arahkan ke login
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
-    }
-    return Promise.reject(error);
-  }
-);
+// Request Interceptor: Menyisipkan header X-CSRF-Token
+api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+  const { method } = config;
+  const methodsRequiringCsrf = ['post', 'put', 'patch', 'delete'];
 
-api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = getAuthToken();
-  if (token) {
-    config.headers.set('Authorization', `Bearer ${token}`);
+  // Jika request mengubah data, pastikan token CSRF dilampirkan
+  if (method && methodsRequiringCsrf.includes(method.toLowerCase())) {
+    if (!csrfToken) {
+      await fetchCsrfToken();
+    }
+
+    if (csrfToken) {
+      config.headers.set('X-CSRF-Token', csrfToken);
+    }
   }
+
   return config;
 });
 
-// Tangani response error secara terpusat
+// Response Interceptor: Penanganan 401 dan 403 (Invalid CSRF)
 api.interceptors.response.use(
   (response) => response,
-  (error: AxiosError<ApiErrorResponse>) => {
+  async (error: AxiosError<ApiErrorResponse>) => {
+    // 1. Penanganan Sesi Habis (401)
     if (error.response?.status === 401) {
-      clearAuthToken();
       if (typeof window !== 'undefined') {
         const isOnAuthPage = window.location.pathname.startsWith('/login');
         if (!isOnAuthPage) {
@@ -70,6 +63,12 @@ api.interceptors.response.use(
         }
       }
     }
+
+    // 2. (Opsional) Penanganan CSRF Token Kedaluwarsa (403)
+    if (error.response?.status === 403 && error.response?.data?.message?.includes('CSRF')) {
+      csrfToken = null;
+    }
+
     return Promise.reject(error);
   },
 );

@@ -1,10 +1,6 @@
-// lib/cookies.ts
-// Helper cookie minimal tanpa dependency tambahan.
-// Dipakai untuk menyimpan access token di client agar BISA dibaca oleh
-// middleware.ts (edge) — localStorage tidak bisa diakses dari middleware.
+// src/lib/cookies.ts
 
 export interface SetCookieOptions {
-  /** Detik hingga cookie kedaluwarsa. Default: 7 hari. */
   maxAgeSeconds?: number;
   path?: string;
 }

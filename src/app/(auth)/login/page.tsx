@@ -1,6 +1,6 @@
 "use client"
 
-import { LoginForm } from "@/src/components/login/login-form"
+import { LoginForm } from "@/src/components/auth/login-form"
 import { GalleryVerticalEndIcon } from "lucide-react"
 
 export default function LoginPage() {
