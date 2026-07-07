@@ -17,13 +17,13 @@ import {
 } from "../components/ui/sidebar"
 
 // Import ikon sesuai dengan konteks fitur backend
-import { 
-  LayoutDashboardIcon, 
-  TrophyIcon, 
+import {
+  LayoutDashboardIcon,
+  TrophyIcon,
   CalendarDaysIcon,
-  ClipboardCheckIcon, 
+  ClipboardCheckIcon,
   CreditCardIcon,
-  UsersIcon, 
+  UsersIcon,
   UserIcon,
   UserCogIcon,
   ActivityIcon,
@@ -38,7 +38,7 @@ const data = {
     email: "admin@festival.com",
     avatar: "/avatars/admin.jpg",
   },
-  
+
   // SECTION 1: UTAMA
   navDashboard: [
     {
@@ -136,7 +136,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      
+
       <SidebarContent>
         {/* SECTION 1: UTAMA */}
         <SidebarGroup>
@@ -167,7 +167,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <NavMain items={data.navSystem} />
         </SidebarGroup>
       </SidebarContent>
-      
+
       <SidebarFooter>
         <NavUser user={data.user} />
       </SidebarFooter>
