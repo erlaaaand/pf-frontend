@@ -1,7 +1,9 @@
+'use server'
 // services/auth.service.ts
 // Pemisah logika API untuk modul Auth (pf-backend: /api/v1/auth/*)
 
 import api, { clearAuthToken, setAuthToken } from '../lib/axios';
+// import { cookies } from 'next/headers'
 import type {
   AuthResponse,
   CurrentUserPayload,

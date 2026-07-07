@@ -1,5 +1,4 @@
 // lib/axios.ts
-
 import axios, {
   AxiosError,
   type AxiosInstance,
@@ -32,11 +31,24 @@ export function clearAuthToken(): void {
 
 export const api: AxiosInstance = axios.create({
   baseURL: BASE_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30_000, // 30 detik, beri ruang untuk endpoint upload file
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      // Jika token kedaluwarsa atau tidak valid, arahkan ke login
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = getAuthToken();
