@@ -1,16 +1,16 @@
 import * as React from "react"
 import { Bell } from "lucide-react"
 
-import { Separator } from "../components/ui/separator"
-import { SidebarTrigger } from "../components/ui/sidebar"
+import { Separator } from "../ui/separator"
+import { SidebarTrigger } from "../ui/sidebar"
 // IMPORT buttonVariants DARI SHADCN
-import { buttonVariants } from "../components/ui/button"
+import { buttonVariants } from "../ui/button"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "../components/ui/popover"
-import { cn } from "../lib/utils" // Pastikan kamu mengimport 'cn' dari utils
+} from "../ui/popover"
+import { cn } from "../../lib/utils" // Pastikan kamu mengimport 'cn' dari utils
 
 export function SiteHeader() {
   return (

@@ -5,8 +5,7 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from 'axios';
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000/api/v1';
+import { API_BASE_URL } from './constants';
 
 const TOKEN_KEY = 'pf_access_token';
 
@@ -30,7 +29,7 @@ export function clearAuthToken(): void {
 // ── Axios Instance ───────────────────────────────────────────────────────
 
 export const api: AxiosInstance = axios.create({
-  baseURL: BASE_URL,
+  baseURL: API_BASE_URL,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

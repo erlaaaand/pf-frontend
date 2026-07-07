@@ -2,8 +2,8 @@
 
 import * as React from "react"
 
-import { NavMain } from "../components/nav-main"
-import { NavUser } from "../components/nav-user"
+import { NavMain } from "./nav-main"
+import { NavUser } from "./nav-user"
 import {
   Sidebar,
   SidebarContent,
@@ -14,7 +14,7 @@ import {
   SidebarMenuItem,
   SidebarGroup,
   SidebarGroupLabel,
-} from "../components/ui/sidebar"
+} from "../ui/sidebar"
 
 // Import ikon sesuai dengan konteks fitur backend
 import {
