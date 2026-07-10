@@ -2,9 +2,10 @@
 "use client"
 
 import { useState } from "react"
-import { CheckCircleIcon, EyeIcon, XCircleIcon, ReceiptIcon } from "lucide-react"
+import { CheckCircleIcon, EyeIcon, XCircleIcon, ReceiptIcon, MailIcon, PhoneIcon } from "lucide-react"
 import { Badge } from "@/src/components/ui/badge"
 import { Button } from "@/src/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar"
 import {
   Card,
   CardContent,
@@ -157,6 +158,109 @@ export function PaymentsTableCard({
             <DialogTitle>Detail Bukti Transfer</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-6 py-4">
+            {selectedPayment && (
+              <div className="bg-white border border-gray-100 rounded-xl p-4 flex flex-col md:flex-row gap-6 items-start shadow-sm">
+                <div className="flex-1 w-full space-y-4">
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">Informasi Pendaftar</p>
+                    {selectedPayment.registration.teamName ? (
+                      <div>
+                        <div className="flex flex-col gap-0.5 mb-3">
+                          <span className="text-sm text-gray-500">Nama Tim</span>
+                          <span className="font-bold text-gray-900 text-lg">{selectedPayment.registration.teamName}</span>
+                        </div>
+                        <div className="flex gap-3 items-center">
+                          <Avatar className="size-10 border border-gray-100">
+                            <AvatarImage src={selectedPayment.registration.participantAvatar || ""} />
+                            <AvatarFallback className="bg-blue-50 text-blue-700">{selectedPayment.registration.participantName.charAt(0).toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col flex-1 min-w-0">
+                            <span className="text-xs text-gray-500">Ketua Tim</span>
+                            <span className="font-semibold text-gray-900 truncate">{selectedPayment.registration.participantName}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex gap-3 items-center">
+                        <Avatar className="size-12 border border-gray-100">
+                          <AvatarImage src={selectedPayment.registration.participantAvatar || ""} />
+                          <AvatarFallback className="bg-blue-50 text-blue-700 text-lg">{selectedPayment.registration.participantName.charAt(0).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col flex-1 min-w-0">
+                          <span className="font-bold text-gray-900 text-lg truncate">{selectedPayment.registration.participantName}</span>
+                          <span className="text-sm text-gray-500">{selectedPayment.registration.institution || "-"}</span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex flex-col gap-1 mt-4">
+                      {selectedPayment.registration.participantEmail && (
+                        <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                          <MailIcon className="size-4 text-gray-400 shrink-0" />
+                          <span className="truncate">{selectedPayment.registration.participantEmail}</span>
+                        </div>
+                      )}
+                      {selectedPayment.registration.participantPhone && (
+                        <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                          <PhoneIcon className="size-4 text-gray-400 shrink-0" />
+                          <span>{selectedPayment.registration.participantPhone}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {selectedPayment.registration.teamName && selectedPayment.registration.members && selectedPayment.registration.members.length > 0 && (
+                    <div className="mt-4 border-t border-gray-100 pt-4">
+                      <p className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">Anggota Lainnya</p>
+                      <div className="flex flex-col gap-3">
+                        {selectedPayment.registration.members.map((m, i: number) => {
+                          const memberName = m.name;
+                          return (
+                            <div key={i} className="flex gap-2 items-start">
+                              <Avatar className="size-8 border border-gray-100">
+                                <AvatarImage src={m.avatar || ""} />
+                                <AvatarFallback className="bg-gray-100 text-gray-600 text-[10px]">{memberName.charAt(0).toUpperCase()}</AvatarFallback>
+                              </Avatar>
+                              <div className="flex flex-col min-w-0">
+                                <p className="text-xs font-medium text-gray-800 truncate">{memberName}</p>
+                                {m.phone && (
+                                  <div className="flex items-center gap-1 text-[10px] text-gray-500">
+                                    <PhoneIcon className="size-2.5 text-gray-400 shrink-0" />
+                                    <span>{m.phone}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex-1 w-full space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                     <div>
+                      <p className="text-xs text-gray-500 mb-0.5">Asal Sekolah</p>
+                      <p className="font-medium text-gray-900 text-sm">{selectedPayment.registration.institution || "-"}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 mb-0.5">Nama Lomba</p>
+                      <p className="font-medium text-gray-900 text-sm">{selectedPayment.registration.competitionName}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 mb-0.5">Pengirim Rekening</p>
+                      <p className="font-medium text-gray-900 text-sm">{selectedPayment.senderName}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 mb-0.5">Metode Transfer</p>
+                      <Badge variant="secondary" className="font-normal">{selectedPayment.paymentMethod}</Badge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {selectedPayment?.paymentAttempts && selectedPayment.paymentAttempts.length > 0 ? (
               <div className="grid gap-6">
                 {selectedPayment.paymentAttempts.map((attempt, index) => (

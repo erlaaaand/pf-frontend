@@ -26,8 +26,13 @@ export function usePayments() {
         registration: {
           id: reg.id,
           participantName: reg.participantName || "Peserta Individu",
+          participantAvatar: reg.participantAvatar,
+          participantEmail: reg.participantEmail,
+          participantPhone: reg.participantPhone,
           teamName: reg.teamName,
           competitionName: reg.competitionName,
+          institution: reg.institution,
+          members: reg.members,
         },
         amount: 0, // Backend tidak menyimpan nominal, bisa disesuaikan jika perlu
         paymentMethod: "Transfer",

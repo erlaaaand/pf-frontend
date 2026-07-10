@@ -9,6 +9,10 @@ export interface SubmissionRow {
   participantName?: string
   teamName?: string
   participantEmail?: string
+  participantAvatar?: string | null
+  participantPhone?: string | null
+  institution?: string | null
+  members?: { name: string; avatar: string | null; email: string | null; phone: string | null }[]
 }
 
 export interface Competition {

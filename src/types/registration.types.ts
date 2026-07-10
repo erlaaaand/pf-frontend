@@ -66,8 +66,11 @@ export interface Registration {
   teamLeaderId: string | null;
   /** Nama user jika ini registrasi individu */
   participantName: string | null;
+  participantAvatar: string | null;
+  participantEmail: string | null;
+  participantPhone: string | null;
   institution?: string | null;
-  members?: string[];
+  members?: { name: string; avatar: string | null; email: string | null; phone: string | null }[];
   status: RegistrationStatus;
   championTitle: ChampionTitle;
   registeredAt: string;

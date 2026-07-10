@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { ClipboardCheckIcon, Loader2Icon, EyeIcon, XIcon } from "lucide-react"
+import { ClipboardCheckIcon, Loader2Icon, EyeIcon, XIcon, MailIcon, PhoneIcon } from "lucide-react"
 import { Badge } from "@/src/components/ui/badge"
 import { Button } from "@/src/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar"
 import {
   Select,
   SelectContent,
@@ -312,35 +313,98 @@ function DetailModal({ registration, onClose, competitionName }: { registration:
           
           {isTeam ? (
             <div className="border border-gray-100 rounded-xl p-4 bg-gray-50/50">
-              <p className="text-sm text-gray-500 mb-3">Informasi Tim</p>
-              <div className="flex flex-col gap-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Nama Tim:</span>
-                  <span className="font-bold text-gray-900">{registration.teamName}</span>
+              <p className="text-sm text-gray-500 mb-4">Informasi Tim</p>
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm text-gray-500">Nama Tim</span>
+                  <span className="font-bold text-gray-900 text-lg">{registration.teamName}</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Ketua Tim:</span>
-                  <span className="font-medium text-gray-900">{leaderName}</span>
+                
+                <div className="bg-white border border-gray-100 rounded-xl p-4">
+                  <p className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">Ketua Tim</p>
+                  <div className="flex gap-4 items-start">
+                    <Avatar className="size-12 border border-gray-100">
+                      <AvatarImage src={registration.participantAvatar || ""} />
+                      <AvatarFallback className="bg-blue-50 text-blue-700">{leaderName.charAt(0).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 truncate">{leaderName}</p>
+                      {registration.participantEmail && (
+                        <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                          <MailIcon className="size-3.5 text-gray-400 shrink-0" />
+                          <span className="truncate">{registration.participantEmail}</span>
+                        </div>
+                      )}
+                      {registration.participantPhone && (
+                        <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                          <PhoneIcon className="size-3.5 text-gray-400 shrink-0" />
+                          <span>{registration.participantPhone}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
+
                 {members.length > 0 && (
-                  <div className="mt-2 pt-3 border-t border-gray-200">
-                    <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">Anggota Lainnya</p>
-                    <ul className="flex flex-col gap-2">
-                      {members.map((m: any, i: number) => (
-                        <li key={i} className="text-sm text-gray-800 flex items-center gap-2">
-                          <div className="size-1.5 rounded-full bg-[#5C7C99]" />
-                          {m.name || m.participantName || m}
-                        </li>
-                      ))}
-                    </ul>
+                  <div className="bg-white border border-gray-100 rounded-xl p-4">
+                    <p className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">Anggota Lainnya</p>
+                    <div className="flex flex-col gap-4">
+                      {members.map((m: any, i: number) => {
+                        const memberName = m.name || m.participantName || m;
+                        return (
+                        <div key={i} className="flex gap-3 items-start pb-4 border-b border-gray-50 last:border-0 last:pb-0">
+                          <Avatar className="size-9 border border-gray-100">
+                            <AvatarImage src={m.avatar || ""} />
+                            <AvatarFallback className="bg-gray-100 text-gray-600 text-xs">{memberName.charAt(0).toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col gap-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-800 truncate">{memberName}</p>
+                            {m.email && (
+                              <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                                <MailIcon className="size-3 text-gray-400 shrink-0" />
+                                <span className="truncate">{m.email}</span>
+                              </div>
+                            )}
+                            {m.phone && (
+                              <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                                <PhoneIcon className="size-3 text-gray-400 shrink-0" />
+                                <span>{m.phone}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )})}
+                    </div>
                   </div>
                 )}
               </div>
             </div>
           ) : (
-            <div>
-              <p className="text-sm text-gray-500 mb-1">Nama Peserta</p>
-              <p className="font-medium text-gray-900">{registration.participantName ?? "-"}</p>
+            <div className="border border-gray-100 rounded-xl p-4 bg-gray-50/50">
+              <p className="text-sm text-gray-500 mb-3">Peserta Individu</p>
+              <div className="bg-white border border-gray-100 rounded-xl p-4">
+                <div className="flex gap-4 items-start">
+                  <Avatar className="size-14 border border-gray-100">
+                    <AvatarImage src={registration.participantAvatar || ""} />
+                    <AvatarFallback className="bg-blue-50 text-blue-700 text-lg">{(registration.participantName ?? "-").charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                    <p className="font-bold text-gray-900 text-lg truncate">{registration.participantName ?? "-"}</p>
+                    {registration.participantEmail && (
+                      <div className="flex items-center gap-1.5 text-sm text-gray-600 mt-0.5">
+                        <MailIcon className="size-4 text-gray-400 shrink-0" />
+                        <span className="truncate">{registration.participantEmail}</span>
+                      </div>
+                    )}
+                    {registration.participantPhone && (
+                      <div className="flex items-center gap-1.5 text-sm text-gray-600 mt-0.5">
+                        <PhoneIcon className="size-4 text-gray-400 shrink-0" />
+                        <span>{registration.participantPhone}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 

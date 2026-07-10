@@ -7,8 +7,13 @@ export type PaymentStatus = "PENDING" | "VERIFIED" | "REJECTED"
 export interface RegistrationSummary {
   id: string
   participantName: string
+  participantAvatar?: string | null
+  participantEmail?: string | null
+  participantPhone?: string | null
   teamName: string | null // Null jika lomba individu
   competitionName: string
+  institution?: string | null
+  members?: { name: string; avatar: string | null; email: string | null; phone: string | null }[]
 }
 
 // 3. Struktur utama data Pembayaran yang dikirim oleh Backend
