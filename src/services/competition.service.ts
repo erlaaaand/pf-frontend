@@ -14,8 +14,15 @@ import type {
   UpdateWavePayload,
 } from '../types/competition.types';
 
-/** [PUBLIC] Daftar semua lomba beserta wave/gelombang pendaftarannya. */
+/** [KHUSUS ADMIN] Daftar semua lomba beserta wave/gelombang pendaftarannya (Termasuk Non-Aktif). */
 export async function getAllCompetitions(): Promise<Competition[]> {
+  // Menggunakan Axios 'api' bawaan agar Token Admin dan Base URL otomatis terisi
+  const { data } = await api.get<Competition[]>('/competitions/admin/list');
+  return data;
+}
+
+/** [PUBLIC] Daftar lomba yang aktif saja. */
+export async function getActiveCompetitions(): Promise<Competition[]> {
   const { data } = await api.get<Competition[]>('/competitions');
   return data;
 }

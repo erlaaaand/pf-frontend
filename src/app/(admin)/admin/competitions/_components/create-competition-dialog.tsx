@@ -24,6 +24,7 @@ import {
 } from "@/src/components/ui/select"
 import { Separator } from "@/src/components/ui/separator"
 import { Textarea } from "@/src/components/ui/textarea"
+import { Switch } from "@/src/components/ui/switch" // Tambahkan import Switch
 
 import * as competitionService from "@/src/services/competition.service"
 
@@ -98,6 +99,8 @@ export function CreateCompetitionDialog({
         minTeamMembers: Number(form.minTeamMembers) || 1,
         maxTeamMembers: Number(form.maxTeamMembers) || 1,
         description: form.description.trim() || undefined,
+        requiresSubmission: form.requiresSubmission,
+        whatsappGroupUrl: form.whatsappGroupUrl.trim() || undefined,
         waves: waves.map((w) => ({
           name: w.name.trim(),
           price: Number(w.price) || 0,
@@ -128,7 +131,7 @@ export function CreateCompetitionDialog({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex-1 overflow-y-auto px-6 py-5">
+          <div className="flex-1 overflow-y-auto px-6 py-5 overflow-x-hidden">
             <div className="grid gap-5">
               <div className="grid gap-2">
                 <Label htmlFor="create-name">Nama Lomba</Label>
@@ -206,6 +209,39 @@ export function CreateCompetitionDialog({
                 />
               </div>
 
+              <div className="grid gap-2">
+                <Label htmlFor="create-wa-url">Link Grup WhatsApp (opsional)</Label>
+                <Input
+                  id="create-wa-url"
+                  type="url"
+                  value={form.whatsappGroupUrl}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, whatsappGroupUrl: e.target.value }))
+                  }
+                  placeholder="https://chat.whatsapp.com/..."
+                />
+                <p className="text-xs text-muted-foreground">
+                  Link ini akan otomatis dikirimkan ke peserta yang pembayarannya terverifikasi.
+                </p>
+              </div>
+
+              {/* Komponen Switch untuk requiresSubmission */}
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <div className="space-y-0.5">
+                  <Label htmlFor="create-requires-submission">Wajib Unggah Karya (Submission)</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Aktifkan jika peserta wajib mengunggah file/karya setelah mendaftar.
+                  </p>
+                </div>
+                <Switch
+                  id="create-requires-submission"
+                  checked={form.requiresSubmission}
+                  onCheckedChange={(checked) =>
+                    setForm((f) => ({ ...f, requiresSubmission: checked }))
+                  }
+                />
+              </div>
+
               <Separator />
 
               <div className="flex items-center justify-between">
@@ -241,7 +277,7 @@ export function CreateCompetitionDialog({
               Batal
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader2Icon className="size-4 animate-spin" />}
+              {isSubmitting && <Loader2Icon className="size-4 animate-spin mr-2" />}
               Simpan Lomba
             </Button>
           </DialogFooter>

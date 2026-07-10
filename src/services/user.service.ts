@@ -24,9 +24,9 @@ export async function adminCreateUser(
   return data;
 }
 
-/** Profil lengkap user yang sedang login. Response di-cache browser 60 detik. */
+/** Profil lengkap user yang sedang login. Response di-cache browser 60 detik (busted via timestamp). */
 export async function getMyProfile(): Promise<User> {
-  const { data } = await api.get<User>('/users/me');
+  const { data } = await api.get<User>(`/users/me?t=${Date.now()}`);
   return data;
 }
 
@@ -67,5 +67,15 @@ export async function updateAvatar(
   payload: UpdateAvatarPayload,
 ): Promise<User> {
   const { data } = await api.patch<User>('/users/me/avatar', payload);
+  return data;
+}
+
+export async function getAllUsers(): Promise<User[]> {
+  const { data } = await api.get<User[]>('/users');
+  return data;
+}
+
+export async function searchParticipants(query: string): Promise<User[]> {
+  const { data } = await api.get<User[]>('/users/search', { params: { q: query } });
   return data;
 }

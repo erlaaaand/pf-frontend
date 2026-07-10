@@ -6,6 +6,7 @@ export enum UserRole {
   ADMIN = 'ADMIN',
   COMMITTEE = 'COMMITTEE',
   PARTICIPANT = 'PARTICIPANT',
+  TREASURER = 'TREASURER',
 }
 
 // ── Payload (Request Body) ──────────────────────────────────────────────────
@@ -31,9 +32,21 @@ export interface VerifyEmailPayload {
   otp: string;
 }
 
-/** Body untuk PATCH /users/:id */
+/** Body untuk POST /auth/forgot-password */
+export interface ForgotPasswordPayload {
+  email: string;
+}
+
+/** Body untuk POST /auth/reset-password */
+export interface ResetPasswordPayload {
+  email: string;
+  otp: string;
+  newPassword: string;
+}
+
 export interface UpdateUserPayload {
   fullName?: string;
+  institution?: string;
   /** Wajib diisi bersamaan dengan newPassword jika ingin ganti password */
   currentPassword?: string;
   /** Wajib diisi bersamaan dengan currentPassword jika ingin ganti password */
@@ -71,11 +84,8 @@ export interface AuthUser {
 
 /** Response dari POST /auth/login, /auth/register (via verify), /auth/verify-email */
 export interface AuthResponse {
-  accessToken: string;
-  tokenType: 'Bearer';
-  /** Contoh format: "7d", "24h" */
-  expiresIn: string;
-  user: AuthUser;
+  message: string;
+  user: CurrentUserPayload; // Menggunakan CurrentUserPayload agar lebih seragam dengan getMe()
 }
 
 /** Response dari GET /auth/me (langsung dari payload JWT, bukan query DB) */
@@ -87,20 +97,15 @@ export interface CurrentUserPayload {
 
 /**
  * Response dari GET /users/me dan GET /users/:id (UserResponseDto).
- *
- * ⚠️ Catatan hasil audit backend: `UserEntity` sebenarnya punya kolom
- * `avatarUrl` dan endpoint `PATCH /users/me/avatar` berhasil menyimpannya,
- * TAPI `UserMapper.toResponseDto()` di backend tidak pernah menyertakan
- * `avatarUrl` ke response manapun (`/users/me`, `/users/:id`, maupun hasil
- * `updateAvatar`). Jadi secara API saat ini, FE TIDAK BISA membaca kembali
- * avatarUrl user meski proses update-nya sendiri sukses. Ini keterbatasan
- * di sisi backend, bukan yang bisa diperbaiki dari core FE — perlu
- * diinfokan ke tim backend jika UI memang butuh menampilkan foto profil.
  */
 export interface User {
   id: string;
   email: string;
   fullName: string | null;
+  avatarUrl: string | null;
+  phoneNumber: string;
+  institution: string;
+  role: UserRole;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

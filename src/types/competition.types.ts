@@ -24,6 +24,7 @@ export interface Competition {
   minTeamMembers: number;
   maxTeamMembers: number;
   description: string | null;
+  requiresSubmission: boolean;
   /** true jika lomba belum ditutup paksa DAN ada wave yang sedang berlangsung hari ini */
   isOpen: boolean;
   /** false jika lomba di-soft-delete/disembunyikan admin */
@@ -31,6 +32,8 @@ export interface Competition {
   /** Wave yang sedang aktif saat ini, null jika tidak ada */
   activeWave: CompetitionWave | null;
   waves: CompetitionWave[];
+  /** Tautan grup WhatsApp koordinasi. Null jika belum diatur admin. */
+  whatsappGroupUrl: string | null;
 }
 
 // ── Payload (Request Body, khusus ADMIN) ────────────────────────────────────
@@ -40,9 +43,9 @@ export interface CreateCompetitionWavePayload {
   name: string;
   price: number;
   /** ISO date string, mis. "2026-08-01T00:00:00.000Z" */
-  startDate: string;
+  startDate: Date;
   /** ISO date string */
-  endDate: string;
+  endDate: Date;
 }
 
 /** Body untuk POST /competitions */
@@ -52,7 +55,10 @@ export interface CreateCompetitionPayload {
   minTeamMembers: number;
   maxTeamMembers: number;
   description?: string;
+  requiresSubmission?: boolean;
   waves?: CreateCompetitionWavePayload[];
+  /** Tautan grup WhatsApp koordinasi peserta lomba. Opsional. */
+  whatsappGroupUrl?: string;
 }
 
 /**
@@ -71,6 +77,6 @@ export type UpdateCompetitionPayload = Partial<
 export interface UpdateWavePayload {
   name?: string;
   price?: number;
-  startDate?: string;
-  endDate?: string;
+  startDate?: Date;
+  endDate?: Date;
 }

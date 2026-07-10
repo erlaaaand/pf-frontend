@@ -47,6 +47,12 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
     }
   }
 
+  // Jika payload adalah FormData, hapus Content-Type agar Axios/Browser 
+  // dapat otomatis menghitung boundary untuk multipart/form-data.
+  if (config.data instanceof FormData) {
+    config.headers.delete('Content-Type');
+  }
+
   return config;
 });
 
@@ -54,19 +60,29 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<ApiErrorResponse>) => {
-    // 1. Penanganan Sesi Habis (401)
+    // Penanganan Sesi Habis (401)
     if (error.response?.status === 401) {
       if (typeof window !== 'undefined') {
-        const isOnAuthPage = window.location.pathname.startsWith('/login');
-        if (!isOnAuthPage) {
+        const path = window.location.pathname;
+        const isOnAuthPage = path.startsWith('/login') || path.startsWith('/register') || path.startsWith('/verify') || path.startsWith('/forgot-password') || path.startsWith('/reset-password');
+        const isPublicPage = path === '/';
+        
+        if (!isOnAuthPage && !isPublicPage) {
+          // Panggil API internal Next.js untuk menghancurkan cookie HttpOnly
+          await fetch('/api/auth/clear', { method: 'POST' });
+          // Setelah cookie benar-benar hancur, baru arahkan ke login
           window.location.href = '/login';
         }
       }
     }
 
-    // 2. (Opsional) Penanganan CSRF Token Kedaluwarsa (403)
-    if (error.response?.status === 403 && error.response?.data?.message?.includes('CSRF')) {
+    if (error.response?.status === 403) {
       csrfToken = null;
+    }
+
+    // Penanganan CSRF Token Kedaluwarsa/Invalid (403)
+    if (error.response?.status === 403 && error.response?.data?.message?.includes('CSRF')) {
+      // (Opsional) reset csrfToken var
     }
 
     return Promise.reject(error);

@@ -27,8 +27,10 @@ export async function createSubmission(
   if (payload.description) {
     formData.append('description', payload.description);
   }
-  formData.append('fileUrl', payload.fileUrl);
   formData.append('file', payload.file);
+  if (payload.originalityFile) {
+    formData.append('originalityFile', payload.originalityFile);
+  }
 
   // PENTING: jangan set header Content-Type secara manual di sini.
   // Axios otomatis menghitung `multipart/form-data; boundary=...` yang benar

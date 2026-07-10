@@ -1,24 +1,17 @@
 // services/registration.service.ts
 // Pemisah logika API untuk modul Registrations
 // (pf-backend: /api/v1/registrations/*)
+//
 
 import api from '../lib/axios';
 import type {
   Registration,
   RegisterCompetitionPayload,
   SetChampionPayload,
+  VerifyPaymentPayload,
 } from '../types/registration.types';
 
-/**
- * (Role PARTICIPANT) Mendaftar ke sebuah lomba, individu atau via tim.
- *
- * Hal penting untuk UI:
- * - Jika lomba bertipe TEAM, `teamId` wajib diisi dan HANYA ketua tim yang
- *   boleh mendaftarkan timnya.
- * - Maksimal 3 lomba aktif per user (status selain CANCELLED/REJECTED).
- * - Jika wave gratis, status langsung VERIFIED. Jika berbayar, status jadi
- *   PENDING_PAYMENT dengan batas waktu 24 jam.
- */
+
 export async function registerCompetition(
   payload: RegisterCompetitionPayload,
 ): Promise<Registration> {
@@ -34,8 +27,45 @@ export async function getMyRegistrations(): Promise<Registration[]> {
   return data;
 }
 
+export async function uploadPaymentProof(
+  id: string,
+  file: File,
+): Promise<Registration> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const { data } = await api.post<Registration>(
+    `/registrations/${id}/payment-proof`,
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  );
+  return data;
+}
+
 /**
- * (Role ADMIN/COMMITTEE) Daftar peserta yang sudah terverifikasi
+ * (Role TREASURER/BENDAHARA) Antrean pendaftaran lintas lomba yang menunggu
+ * verifikasi bukti pembayaran, diurutkan dari yang paling lama menunggu.
+ */
+export async function getPendingVerifications(): Promise<Registration[]> {
+  const { data } = await api.get<Registration[]>(
+    '/registrations/bendahara/pending-verification',
+  );
+  return data;
+}
+
+export async function verifyPayment(
+  id: string,
+  payload: VerifyPaymentPayload,
+): Promise<Registration> {
+  const { data } = await api.patch<Registration>(
+    `/registrations/bendahara/${id}/verify`,
+    payload,
+  );
+  return data;
+}
+
+/**
+ * (Role ADMIN/COMMITTEE/TREASURER) Daftar peserta yang sudah terverifikasi
  * pembayarannya untuk satu lomba tertentu.
  */
 export async function getVerifiedParticipants(
@@ -47,7 +77,6 @@ export async function getVerifiedParticipants(
   return data;
 }
 
-/** (Role ADMIN/COMMITTEE) Menetapkan gelar juara ke satu pendaftaran. */
 export async function setChampionTitle(
   id: string,
   payload: SetChampionPayload,

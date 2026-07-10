@@ -35,3 +35,12 @@ export async function getMyTeam(): Promise<Team> {
   const { data } = await api.get<Team>('/teams/my-team');
   return data;
 }
+
+/**
+ * Membubarkan tim milik user.
+ * HANYA ketua tim yang boleh memanggil ini.
+ */
+export async function leaveTeam(): Promise<{ message: string }> {
+  const { data } = await api.delete<{ message: string }>('/teams/my-team');
+  return data;
+}

@@ -44,6 +44,8 @@ export interface DetailFormState {
   maxTeamMembers: string
   description: string
   isActive: boolean
+  requiresSubmission: boolean;
+  whatsappGroupUrl: string;
 }
 
 export const EMPTY_DETAIL_FORM: DetailFormState = {
@@ -53,4 +55,6 @@ export const EMPTY_DETAIL_FORM: DetailFormState = {
   maxTeamMembers: "1",
   description: "",
   isActive: true,
+  requiresSubmission: true,
+  whatsappGroupUrl: "",
 }

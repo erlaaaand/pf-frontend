@@ -7,6 +7,7 @@ export interface TeamMember {
   userId: string;
   fullName: string;
   joinedAt: string;
+  avatarUrl: string | null;
 }
 
 /** Ketua tim */
@@ -14,6 +15,7 @@ export interface TeamLeader {
   id: string;
   fullName: string;
   email: string;
+  avatarUrl: string | null;
 }
 
 /** Response dari POST /teams, POST /teams/members, GET /teams/my-team */

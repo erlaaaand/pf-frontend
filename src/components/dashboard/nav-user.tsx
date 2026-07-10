@@ -1,5 +1,11 @@
 "use client"
 
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+
+// Import fungsi logout dari service auth kamu
+import { logout } from "../../services/auth.service"
+
 import {
   Avatar,
   AvatarFallback,
@@ -20,7 +26,18 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "../ui/sidebar"
-import { EllipsisVerticalIcon, CircleUserRoundIcon, CreditCardIcon, BellIcon, LogOutIcon } from "lucide-react"
+import { EllipsisVerticalIcon, CircleUserRoundIcon, LogOutIcon } from "lucide-react"
+
+// ── FUNGSI PEMBANTU: Mengambil Inisial ───────────────────────────────
+function getInitials(name: string) {
+  if (!name) return "U"
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .substring(0, 2)
+}
 
 export function NavUser({
   user,
@@ -29,9 +46,44 @@ export function NavUser({
     name: string
     email: string
     avatar: string
+    role?: string
   }
 }) {
   const { isMobile } = useSidebar()
+  const router = useRouter()
+  const initials = getInitials(user.name)
+
+  const handleLogout = async () => {
+    const loadingId = toast.loading("Sedang keluar...");
+
+    try {
+      await logout();
+      } catch (_error) {
+      } finally {
+        try {
+          await fetch('/api/auth/clear', { method: 'POST' });
+        } catch (err) {
+          // console.error("Gagal memanggil endpoint clear cookie lokal", err);
+        }
+
+        document.cookie = "x-csrf-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = "accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+        toast.success("Berhasil log out.", { id: loadingId });
+
+        window.location.href = "/login";
+      }
+  };
+
+  const handleProfileRedirect = () => {
+    let prefix = "";
+    if (user.role === "COMMITTEE") prefix = "/committee";
+    else if (user.role === "ADMIN") prefix = "/admin";
+    else if (user.role === "TREASURER") prefix = "/treasurer";
+    
+    router.push(`${prefix}/profile`);
+  }
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -41,9 +93,11 @@ export function NavUser({
               <SidebarMenuButton size="lg" className="aria-expanded:bg-muted" />
             }
           >
-            <Avatar className="size-8 rounded-lg grayscale">
+            <Avatar className="size-8 rounded-lg">
               <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+              <AvatarFallback className="rounded-lg bg-primary text-primary-foreground">
+                {initials}
+              </AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">{user.name}</span>
@@ -64,7 +118,9 @@ export function NavUser({
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                   <Avatar className="size-8">
                     <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                    <AvatarFallback className="rounded-lg bg-primary text-primary-foreground">
+                      {initials}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-medium">{user.name}</span>
@@ -77,26 +133,18 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <CircleUserRoundIcon
-                />
+              <DropdownMenuItem onClick={handleProfileRedirect} className="cursor-pointer">
+                <CircleUserRoundIcon className="mr-2 size-4" />
                 Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCardIcon
-                />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <BellIcon
-                />
-                Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOutIcon
-              />
+
+            <DropdownMenuItem
+              onClick={handleLogout}
+              className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
+            >
+              <LogOutIcon className="mr-2 size-4" />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

@@ -48,6 +48,8 @@ interface EditCompetitionDialogProps {
 
 function toDetailForm(competition: Competition): DetailFormState {
   const isActive = competition.isActive === true || String(competition.isActive) === "1" || String(competition.isActive) === "true";
+  const isSubmission = competition.requiresSubmission === true || String(competition.requiresSubmission) === "1" || String(competition.requiresSubmission) === "true";
+  
   return {
     name: competition.name,
     participantType: competition.participantType,
@@ -55,6 +57,8 @@ function toDetailForm(competition: Competition): DetailFormState {
     maxTeamMembers: String(competition.maxTeamMembers),
     description: competition.description ?? "",
     isActive: isActive,
+    requiresSubmission: isSubmission,
+    whatsappGroupUrl: competition.whatsappGroupUrl ?? "",
   }
 }
 
@@ -106,6 +110,8 @@ export function EditCompetitionDialog({
         maxTeamMembers: Number(form.maxTeamMembers) || 1,
         description: form.description.trim() || undefined,
         isActive: form.isActive,
+        requiresSubmission: form.requiresSubmission,
+        whatsappGroupUrl: form.whatsappGroupUrl.trim() || undefined,
       }
       await competitionService.updateCompetition(competition.id, payload)
       toast.success("Detail lomba berhasil diperbarui.")
@@ -164,7 +170,7 @@ export function EditCompetitionDialog({
               </TabsList>
             </div>
 
-            <TabsContent value="detail" className="flex-1 overflow-y-auto px-6 py-5">
+            <TabsContent value="detail" className="flex-1 overflow-y-auto overflow-x-hidden px-6 py-5">
               <form
                 id="edit-competition-detail-form"
                 onSubmit={handleDetailSubmit}
@@ -246,8 +252,42 @@ export function EditCompetitionDialog({
                   />
                 </div>
 
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-wa-url">Link Grup WhatsApp (opsional)</Label>
+                  <Input
+                    id="edit-wa-url"
+                    type="url"
+                    value={form.whatsappGroupUrl}
+                    onChange={(e) =>
+                      setForm((f) => f && { ...f, whatsappGroupUrl: e.target.value })
+                    }
+                    placeholder="https://chat.whatsapp.com/..."
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Link ini akan otomatis dikirimkan ke peserta yang pembayarannya terverifikasi.
+                  </p>
+                </div>
+
+                {/* Komponen Switch untuk requiresSubmission */}
                 <div className="flex items-center justify-between rounded-lg border p-3">
-                  <div>
+                  <div className="space-y-0.5">
+                    <Label htmlFor="edit-requires-submission">Wajib Unggah Karya (Submission)</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Aktifkan jika peserta wajib mengunggah file/karya setelah mendaftar.
+                    </p>
+                  </div>
+                  <Switch
+                    id="edit-requires-submission"
+                    checked={form.requiresSubmission}
+                    onCheckedChange={(checked) =>
+                      setForm((f) => f && { ...f, requiresSubmission: checked })
+                    }
+                  />
+                </div>
+
+                {/* Komponen Switch untuk Lomba Aktif */}
+                <div className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="space-y-0.5">
                     <Label htmlFor="edit-active">Lomba Aktif</Label>
                     <p className="text-xs text-muted-foreground">
                       Nonaktifkan untuk menyembunyikan lomba dari katalog publik.
@@ -264,7 +304,7 @@ export function EditCompetitionDialog({
               </form>
             </TabsContent>
 
-            <TabsContent value="waves" className="flex-1 overflow-y-auto px-6 py-5">
+            <TabsContent value="waves" className="flex-1 overflow-y-auto overflow-x-hidden px-6 py-5">
               <div className="flex flex-col gap-3">
                 <p className="text-xs text-muted-foreground">
                   Gelombang baru hanya dapat ditambahkan saat membuat lomba baru.
@@ -303,7 +343,7 @@ export function EditCompetitionDialog({
               form="edit-competition-detail-form"
               disabled={isSubmittingDetail}
             >
-              {isSubmittingDetail && <Loader2Icon className="size-4 animate-spin" />}
+              {isSubmittingDetail && <Loader2Icon className="size-4 animate-spin mr-2" />}
               Simpan Perubahan
             </Button>
           ) : (

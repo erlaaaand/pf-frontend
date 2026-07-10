@@ -1,40 +1,25 @@
-import Link from 'next/link';
-import { Button } from '../components/ui/button'; // Asumsi kamu punya komponen button dari shadcn
+import { Navbar } from "@/src/components/landing/Navbar";
+import { Hero } from "@/src/components/landing/Hero";
+import { About } from "@/src/components/landing/About";
+import { Competitions } from "@/src/components/landing/Competitions";
+import { Benefits } from "@/src/components/landing/Benefits";
+import { Timeline } from "@/src/components/landing/Timeline";
+import { Downloads } from "@/src/components/landing/Downloads";
+import { Footer } from "@/src/components/landing/Footer";
 
 export default function LandingPage() {
   return (
-    <div className="flex min-h-screen flex-col">
-      {/* Header Publik */}
-      <header className="flex items-center justify-between px-6 py-4 border-b">
-        <h1 className="text-xl font-bold">Physics Festival 2026</h1>
-        <nav className="flex gap-4">
-          <Link href="/login">
-            <Button variant="ghost">Masuk</Button>
-          </Link>
-          <Link href="/register">
-            <Button>Daftar Sekarang</Button>
-          </Link>
-        </nav>
-      </header>
-
-      {/* Hero Section */}
-      <main className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-slate-50">
-        <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">
-          Olimpiade Fisika Terbesar di Sumatera
-        </h2>
-        <p className="text-lg text-slate-600 mb-8 max-w-2xl">
-          Tunjukkan kemampuanmu, bentuk tim terbaik, dan menangkan total hadiah puluhan juta rupiah.
-          Pendaftaran gelombang pertama telah dibuka!
-        </p>
-        <Link href="/register">
-          <Button size="lg" className="text-lg px-8">Mulai Perjalananmu</Button>
-        </Link>
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <main className="flex-1">
+        <Hero />
+        <About />
+        <Competitions />
+        <Benefits />
+        <Timeline />
+        <Downloads />
       </main>
-
-      {/* Footer Publik */}
-      <footer className="py-6 text-center text-sm text-slate-500 border-t">
-        © 2026 Physics Festival Committee.
-      </footer>
+      <Footer />
     </div>
   );
 }

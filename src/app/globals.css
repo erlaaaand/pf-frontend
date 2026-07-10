@@ -46,6 +46,24 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Cosmic Odyssey Theme Colors */
+  --color-cosmic-navy: #0B132B;
+  --color-cosmic-dark: #050A15;
+  --color-unand-green: #2D6A4F;
+  --color-unand-gold: #F59E0B;
+  --color-neon-cyan: #00F0FF;
+
+  /* Landing Page Palette (CLAUDE.md v2) */
+  --color-lp-bg: #F4F9FF;
+  --color-lp-surface: #FFFFFF;
+  --color-navy-900: #0E2240;
+  --color-blue-800: #1B3768;
+  --color-sky-500: #4C89DE;
+  --color-sky-600: #3A72C4;
+  --color-lp-gold: #FFCF7B;
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
 }
 
 :root {
@@ -125,6 +143,28 @@
     @apply bg-background text-foreground;
   }
   html {
-    @apply font-sans;
+    @apply font-sans scroll-smooth;
+  }
+}
+
+@layer utilities {
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+  
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+  
+  .group:hover .group-hover\:rotate-y-180 {
+    transform: rotateY(180deg);
   }
 }

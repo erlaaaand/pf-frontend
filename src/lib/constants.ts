@@ -58,4 +58,17 @@ export const AUTH_RATE_LIMIT = {
   windowMs: 60_000,
 };
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000/api/v1';
+const getApiBaseUrl = () => {
+  if (process.env.NEXT_PUBLIC_API_BASE_URL) {
+    return process.env.NEXT_PUBLIC_API_BASE_URL;
+  }
+  // Di browser (client-side), gunakan IP/domain server tempat frontend diakses
+  // asalkan port backend dipastikan jalan di 3000
+  if (typeof window !== 'undefined') {
+    return `http://${window.location.hostname}:3000/api/v1`;
+  }
+  // Fallback default untuk SSR (Server-Side)
+  return 'http://localhost:3000/api/v1';
+};
+
+export const API_BASE_URL = getApiBaseUrl();

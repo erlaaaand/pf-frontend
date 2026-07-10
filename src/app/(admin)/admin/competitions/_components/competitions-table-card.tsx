@@ -72,6 +72,7 @@ export function CompetitionsTableCard({
               <TableRow>
                 <TableHead>Nama Lomba</TableHead>
                 <TableHead>Tipe</TableHead>
+                <TableHead>Submissions</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Pendaftaran</TableHead>
                 <TableHead>Gelombang Aktif</TableHead>
@@ -86,6 +87,17 @@ export function CompetitionsTableCard({
                     {competition.participantType === "TEAM"
                       ? `Tim (${competition.minTeamMembers}-${competition.maxTeamMembers})`
                       : "Individu"}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant="outline"
+                      className={competition.requiresSubmission
+                        ? "border-emerald-200 bg-emerald-100 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400" 
+                        : "border-muted bg-muted/50 text-muted-foreground"
+                      }
+                    >
+                      {competition.requiresSubmission ? "Aktif" : "Nonaktif"}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     <Badge

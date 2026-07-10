@@ -19,6 +19,16 @@ export enum ChampionTitle {
   HONORABLE_MENTION = 'HONORABLE_MENTION',
 }
 
+/**
+ * Keputusan bendahara terhadap bukti pembayaran (sesuai
+ * `VerificationAction` / `VerifyPaymentDto` di
+ * registrations/applications/dto/verify-payment.dto.ts).
+ */
+export enum VerificationAction {
+  APPROVE = 'APPROVE',
+  REJECT = 'REJECT',
+}
+
 // ── Payload (Request Body) ──────────────────────────────────────────────────
 
 /** Body untuk POST /registrations */
@@ -34,6 +44,16 @@ export interface SetChampionPayload {
   title: ChampionTitle;
 }
 
+/**
+ * Body untuk PATCH /registrations/bendahara/:id/verify (khusus TREASURER/ADMIN).
+ * `note` wajib diisi kalau `action` adalah REJECT (divalidasi di backend,
+ * lempar 400 jika kosong).
+ */
+export interface VerifyPaymentPayload {
+  action: VerificationAction;
+  note?: string;
+}
+
 // ── Response ─────────────────────────────────────────────────────────────────
 
 /** Response dari POST/GET registrations (RegistrationResponseDto) */
@@ -43,11 +63,36 @@ export interface Registration {
   competitionName: string;
   waveName: string;
   teamName: string | null;
+  teamLeaderId: string | null;
   /** Nama user jika ini registrasi individu */
   participantName: string | null;
+  institution?: string | null;
+  members?: string[];
   status: RegistrationStatus;
   championTitle: ChampionTitle;
   registeredAt: string;
+
+  /** URL bukti pembayaran yang diunggah peserta (null jika belum unggah). */
+  proofOfPaymentUrl: string | null;
+  /** Waktu bukti pembayaran diunggah. */
+  proofUploadedAt: string | null;
+
+  /** Catatan bendahara — terutama diisi kalau status REJECTED. */
+  verificationNote: string | null;
+  /** Waktu verifikasi (approve/reject) oleh bendahara. */
+  verifiedAt: string | null;
+
+  paymentAttempts: {
+    id: string;
+    proofOfPaymentUrl: string;
+    status: string;
+    rejectionReason?: string | null;
+    verifiedAt?: string | null;
+    uploadedAt: string;
+  }[];
+
+  /** Tautan grup WhatsApp koordinasi. Hanya tersedia jika status VERIFIED dan admin sudah mengisi. */
+  whatsappGroupUrl: string | null;
 }
 
 /**

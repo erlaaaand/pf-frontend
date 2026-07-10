@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 import { cn } from "../../lib/utils";
 import { Button } from "../ui/button";
 import { Field, FieldGroup, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
-import { verifyEmailAction } from "../../services/auth.action";
+import { verifyEmail } from "../../services/auth.service";
 
 export function VerifyForm({
   className,
@@ -32,8 +33,18 @@ export function VerifyForm({
     const otp = formData.get("otp") as string;
 
     try {
-      await verifyEmailAction({ email, otp });
-      router.push("/dashboard");
+      const response = await verifyEmail({ email, otp });
+      localStorage.setItem("welcomeToast", "true");
+      
+      const role = response.user.role;
+      const ROLE_DASHBOARD: Record<string, string> = {
+        ADMIN: "/admin/dashboard",
+        COMMITTEE: "/committee/dashboard",
+        PARTICIPANT: "/dashboard",
+      };
+      const target = ROLE_DASHBOARD[role] ?? "/dashboard";
+      
+      window.location.href = target;
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -52,10 +63,10 @@ export function VerifyForm({
       {...props}
     >
       <FieldGroup>
-        <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">Verify Your Email</h1>
-          <p className="text-sm text-balance text-muted-foreground">
-            We have sent a 6-digit OTP to your email
+        <div className="flex flex-col items-center gap-2 text-center mb-4">
+          <h1 className="text-2xl font-extrabold text-[#2C2621]">Verifikasi Email</h1>
+          <p className="text-sm text-balance text-[#5C7C99]">
+            Kami telah mengirimkan 6 digit kode OTP ke email Anda.
           </p>
         </div>
 
@@ -66,7 +77,7 @@ export function VerifyForm({
         )}
 
         <Field>
-          <FieldLabel htmlFor="email">Email</FieldLabel>
+          <FieldLabel htmlFor="email" className="text-[#2C2621] font-semibold">Email</FieldLabel>
           <Input
             id="email"
             name="email"
@@ -74,13 +85,14 @@ export function VerifyForm({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            readOnly={!!searchParams.get("email")}
-            className={searchParams.get("email") ? "bg-muted" : ""}
+            readOnly // Sengaja di-lock sesuai permintaan agar tidak diganti
+            className="bg-gray-100 border-[#5C7C99]/30 text-gray-500 cursor-not-allowed select-none pointer-events-none focus:ring-0"
+            tabIndex={-1}
           />
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="otp">OTP Code</FieldLabel>
+          <FieldLabel htmlFor="otp" className="text-[#2C2621] font-semibold">Kode OTP</FieldLabel>
           <Input
             id="otp"
             name="otp"
@@ -88,13 +100,13 @@ export function VerifyForm({
             maxLength={6}
             placeholder="123456"
             required
-            className="text-center tracking-widest"
+            className="text-center tracking-[0.5em] font-bold text-lg bg-white border-[#5C7C99]/30 focus:border-[#5C7C99] focus:ring-[#5C7C99]"
           />
         </Field>
 
-        <Field>
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Verifying..." : "Verify & Login"}
+        <Field className="mt-2">
+          <Button type="submit" className="w-full bg-[#5C7C99] hover:bg-[#49657E] text-white rounded-md font-semibold" disabled={isLoading}>
+            {isLoading ? "Memverifikasi..." : "Verifikasi & Masuk"}
           </Button>
         </Field>
       </FieldGroup>
