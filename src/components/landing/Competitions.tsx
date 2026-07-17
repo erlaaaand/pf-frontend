@@ -139,18 +139,90 @@ export function Competitions() {
   }, []);
 
   const carouselRef = useRef<HTMLDivElement>(null);
+  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  const scrollLeft = () => {
+  // Inisialisasi posisi scroll di tengah (replika 3)
+  useEffect(() => {
+    if (competitions.length > 0 && carouselRef.current) {
+      let isInitialized = false;
+      const el = carouselRef.current;
+      
+      const centerCarousel = () => {
+        const scrollWidth = el.scrollWidth;
+        // ScrollWidth bisa jadi 0 atau sangat kecil jika belum di-render sempurna
+        if (scrollWidth > window.innerWidth && !isInitialized) {
+          const segmentWidth = scrollWidth / 5;
+          el.style.scrollSnapType = 'none';
+          el.scrollLeft = segmentWidth * 2;
+          void el.offsetWidth; // Paksa reflow
+          el.style.scrollSnapType = 'x mandatory';
+          
+          if (el.scrollLeft > 0) {
+            isInitialized = true;
+          }
+        }
+      };
+
+      // Coba langsung jalankan
+      centerCarousel();
+
+      // Gunakan ResizeObserver untuk menangkap momen ketika layout/image selesai dirender
+      const observer = new ResizeObserver(() => {
+        if (!isInitialized) {
+          centerCarousel();
+        }
+      });
+      observer.observe(el);
+
+      return () => observer.disconnect();
+    }
+  }, [competitions]);
+
+  const handleScroll = () => {
+    if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+    scrollTimeout.current = setTimeout(() => {
+      if (!carouselRef.current || competitions.length === 0) return;
+      const { scrollLeft, scrollWidth } = carouselRef.current;
+      
+      const segmentWidth = scrollWidth / 5;
+      
+      // Jika scroll masuk ke replika 1
+      if (scrollLeft < segmentWidth) {
+        carouselRef.current.style.scrollSnapType = 'none';
+        carouselRef.current.scrollLeft += segmentWidth * 2;
+        void carouselRef.current.offsetWidth;
+        carouselRef.current.style.scrollSnapType = 'x mandatory';
+      } 
+      // Jika scroll masuk ke replika 5
+      else if (scrollLeft >= segmentWidth * 4 - 10) {
+        carouselRef.current.style.scrollSnapType = 'none';
+        carouselRef.current.scrollLeft -= segmentWidth * 2;
+        void carouselRef.current.offsetWidth;
+        carouselRef.current.style.scrollSnapType = 'x mandatory';
+      }
+    }, 250);
+  };
+
+  const scrollLeftAction = () => {
     if (carouselRef.current) {
-      carouselRef.current.scrollBy({ left: -300, behavior: "smooth" });
+      carouselRef.current.scrollBy({ left: -320, behavior: "smooth" });
     }
   };
 
-  const scrollRight = () => {
+  const scrollRightAction = () => {
     if (carouselRef.current) {
-      carouselRef.current.scrollBy({ left: 300, behavior: "smooth" });
+      carouselRef.current.scrollBy({ left: 320, behavior: "smooth" });
     }
   };
+
+  // Buat 5 replika untuk infinite loop (tanpa putus/rewind)
+  const infiniteCompetitions = [
+    ...competitions,
+    ...competitions,
+    ...competitions,
+    ...competitions,
+    ...competitions,
+  ];
 
   return (
     <section id="competitions" className="relative py-24 md:py-32 bg-white">
@@ -183,11 +255,12 @@ export function Competitions() {
             <div className="md:hidden relative w-full px-2">
               <div 
                 ref={carouselRef}
+                onScroll={handleScroll}
                 className="flex overflow-x-auto gap-4 snap-x snap-mandatory scrollbar-hide pb-8 pt-4 px-4 -mx-4"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
-                {competitions.map((competition) => (
-                  <div key={competition.id} className="min-w-[85%] sm:min-w-[70%] snap-center shrink-0">
+                {infiniteCompetitions.map((competition, idx) => (
+                  <div key={`${competition.id}-${idx}`} className="w-[85vw] sm:w-[320px] max-w-[340px] snap-center shrink-0 mx-auto flex justify-center">
                     <FlipCard competition={competition} />
                   </div>
                 ))}
@@ -196,14 +269,14 @@ export function Competitions() {
               {/* Carousel Navigation Buttons */}
               <div className="flex justify-center items-center gap-4 mt-4">
                 <button 
-                  onClick={scrollLeft}
+                  onClick={scrollLeftAction}
                   className="w-10 h-10 rounded-full bg-[#5C7C99]/10 text-[#5C7C99] flex items-center justify-center hover:bg-[#5C7C99] hover:text-white transition-colors"
                   aria-label="Previous"
                 >
                   <ChevronLeft size={20} />
                 </button>
                 <button 
-                  onClick={scrollRight}
+                  onClick={scrollRightAction}
                   className="w-10 h-10 rounded-full bg-[#5C7C99]/10 text-[#5C7C99] flex items-center justify-center hover:bg-[#5C7C99] hover:text-white transition-colors"
                   aria-label="Next"
                 >

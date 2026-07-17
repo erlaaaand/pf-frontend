@@ -62,6 +62,7 @@ export function Hero() {
           <Image 
             src="/mascot/velune.png" 
             alt="Velune Mascot" 
+            priority
             width={300} 
             height={400}
             className="w-32 sm:w-40 md:w-56 lg:w-72 h-auto drop-shadow-[0_0_30px_rgba(234,191,106,0.4)]"
@@ -109,7 +110,7 @@ export function Hero() {
                 Jelajahi Lomba
               </Button>
             </Link>
-            <Link href="/docs/guidebook.pdf" target="_blank" className="w-full sm:w-auto">
+            <Link href="https://drive.google.com/drive/folders/1BGzJoy1puJccn7c0vo_2CLMumKZfPnGK" target="_blank" className="w-full sm:w-auto">
               <Button variant="outline" className="w-full sm:w-auto bg-transparent border-[#5C7C99] hover:bg-[#5C7C99]/20 text-white rounded-full px-8 py-6 text-lg font-semibold hover:-translate-y-1 transition-all duration-300">
                 Unduh Guide Book
               </Button>

@@ -29,7 +29,9 @@ import {
   RocketIcon,
   UploadCloudIcon,
   Loader2Icon,
-  Banknote
+  Banknote,
+  Activity,
+  Server
 } from "lucide-react"
 
 // Import types dan service
@@ -89,6 +91,13 @@ const SIDEBAR_CONFIG: Record<UserRole, NavGroup[]> = {
       label: "Pengguna",
       items: [
         { title: "Buat Akun Pengguna", url: "/admin/users", icon: <UsersIcon /> },
+      ],
+    },
+    {
+      label: "Pemantauan",
+      items: [
+        { title: "Kesehatan Sistem", url: "/admin/system", icon: <Activity /> },
+        { title: "Sandbox Ekosistem", url: "/admin/sandbox", icon: <Server /> },
       ],
     },
   ],

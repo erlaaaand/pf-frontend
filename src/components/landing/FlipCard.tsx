@@ -74,7 +74,7 @@ export function FlipCard({ competition }: FlipCardProps) {
 
   return (
     <div
-      className="relative w-[280px] sm:w-[320px] shrink-0 h-[450px] [perspective:1000px] cursor-pointer"
+      className="relative w-full max-w-[340px] mx-auto h-[450px] [perspective:1000px] cursor-pointer"
       onPointerEnter={(e) => {
         // Hanya aktifkan hover jika menggunakan mouse desktop
         if (e.pointerType === "mouse") setIsHovered(true);
@@ -98,6 +98,7 @@ export function FlipCard({ competition }: FlipCardProps) {
                 src={logo} 
                 alt={`${competition.name} Logo`} 
                 fill
+                sizes="(max-width: 768px) 112px, 128px"
                 className="object-contain drop-shadow-[0_8px_16px_rgba(44,38,33,0.15)]"
               />
             ) : (
@@ -107,6 +108,7 @@ export function FlipCard({ competition }: FlipCardProps) {
                 fill
                 sizes="(max-width: 768px) 100vw, 33vw"
                 className="object-contain drop-shadow-[0_4px_8px_rgba(44,38,33,0.15)]"
+                priority
               />
             )}
           </div>
@@ -118,7 +120,9 @@ export function FlipCard({ competition }: FlipCardProps) {
                 src="/mascot/velune.png" 
                 alt="Velune Mascot" 
                 fill
+                sizes="48px"
                 className="object-contain drop-shadow-sm"
+                priority
               />
             </div>
           )}
