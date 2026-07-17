@@ -7,6 +7,7 @@ import { Button } from "@/src/components/ui/button"
 import { Skeleton } from "@/src/components/ui/skeleton"
 import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar"
 import type { SubmissionRow } from "../_types"
+import { FilePreviewDialog } from "@/src/components/ui/file-preview-dialog"
 
 interface SubmissionsTableCardProps {
   hasSelectedCompetition: boolean
@@ -22,6 +23,7 @@ export function SubmissionsTableCard({
   submissions,
 }: SubmissionsTableCardProps) {
   const [detailModal, setDetailModal] = useState<SubmissionRow | null>(null)
+  const [previewFile, setPreviewFile] = useState<{ url: string; name: string } | null>(null)
   
   if (!hasSelectedCompetition) {
     return <EmptyState message="Pilih lomba terlebih dahulu untuk melihat karya." />
@@ -99,7 +101,7 @@ export function SubmissionsTableCard({
                       variant="outline" 
                       size="sm"
                       className="shadow-none border-gray-200 text-gray-600 h-8 px-3 hover:bg-gray-50"
-                      onClick={() => window.open(submission.fileUrl, "_blank", "noopener,noreferrer")}
+                      onClick={() => setPreviewFile({ url: submission.fileUrl, name: `Karya: ${submission.title}` })}
                     >
                       Buka File <ExternalLink className="ml-2 size-3.5" />
                     </Button>
@@ -151,7 +153,7 @@ export function SubmissionsTableCard({
               <Button 
                 variant="outline" 
                 className="flex-1 shadow-none border-gray-200 text-gray-700"
-                onClick={() => window.open(submission.fileUrl, "_blank", "noopener,noreferrer")}
+                onClick={() => setPreviewFile({ url: submission.fileUrl, name: `Karya: ${submission.title}` })}
               >
                 Buka File <ExternalLink className="ml-2 size-3.5" />
               </Button>
@@ -166,6 +168,13 @@ export function SubmissionsTableCard({
           onClose={() => setDetailModal(null)} 
         />
       )}
+      
+      <FilePreviewDialog 
+        isOpen={!!previewFile}
+        onClose={() => setPreviewFile(null)}
+        fileUrl={previewFile?.url || null}
+        fileName={previewFile?.name}
+      />
     </div>
   )
 }

@@ -18,6 +18,7 @@ import { Label } from "@/src/components/ui/label";
 import { Input } from "@/src/components/ui/input";
 import { MessageCircle, CheckCircle2, Download, FileText } from "lucide-react";
 import { AxiosError } from "axios";
+import { FilePreviewDialog } from "@/src/components/ui/file-preview-dialog";
 
 export function RegistrationList({
   registrations,
@@ -29,15 +30,42 @@ export function RegistrationList({
   onMutate: () => void;
 }) {
   const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [filesToUpload, setFilesToUpload] = useState<Record<string, { payment?: File; identity?: File[] }>>({});
+  const [previewFile, setPreviewFile] = useState<{ url: string; name: string; } | null>(null);
   const { profile } = useProfileContext();
   const userId = profile?.id;
 
-  async function handleUploadPayment(id: string, file: File | undefined) {
-    if (!file) return;
+  function handleFileChange(regId: string, type: 'payment' | 'identity', files: FileList | null, index: number = 0) {
+    if (!files || !files[0]) return;
+    
+    setFilesToUpload((prev) => {
+      const existing = prev[regId] || {};
+      
+      if (type === 'payment') {
+        return { ...prev, [regId]: { ...existing, payment: files[0] } };
+      } else {
+        const currentIdentity = [...(existing.identity || [])];
+        currentIdentity[index] = files[0];
+        return { ...prev, [regId]: { ...existing, identity: currentIdentity } };
+      }
+    });
+  }
+
+  async function handleUploadPayment(id: string, isTeam: boolean) {
+    const files = filesToUpload[id];
+    const validIdentityFiles = files?.identity?.filter(Boolean) || [];
+    if (!files?.payment || validIdentityFiles.length === 0) {
+      toast.error("Harap unggah bukti pembayaran dan kartu pelajar/identitas.");
+      return;
+    }
+    
+    // For teams, we can check if the number of files matches the number of members
+    // but the backend only requires array of files. We'll pass the valid ones.
+    // We will validate length on the UI before allowing submit.
 
     setUploadingId(id);
     try {
-      await registrationService.uploadPaymentProof(id, file);
+      await registrationService.uploadPaymentProof(id, files.payment, validIdentityFiles as File[]);
       toast.success("Bukti pembayaran berhasil diunggah");
       onMutate();
     } catch (error: unknown) {
@@ -116,9 +144,18 @@ export function RegistrationList({
                           </div>
                           <div className="text-muted-foreground flex flex-col gap-1 mt-2">
                             <p>Waktu: {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(attempt.uploadedAt))}</p>
-                            <a href={attempt.proofOfPaymentUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline w-fit">
-                              Lihat File Bukti
-                            </a>
+                            <button onClick={() => setPreviewFile({ url: attempt.proofOfPaymentUrl, name: 'Bukti Pembayaran' })} className="text-blue-500 hover:underline w-fit text-left">
+                              Lihat Bukti Pembayaran
+                            </button>
+                            {attempt.identityCardUrls && attempt.identityCardUrls.length > 0 && (
+                              <div className="flex flex-col gap-1 mt-1">
+                                {attempt.identityCardUrls.map((url, i) => (
+                                  <button key={i} onClick={() => setPreviewFile({ url, name: `Kartu Pelajar - Anggota ${i+1}` })} className="text-blue-500 hover:underline w-fit text-left">
+                                    Lihat Kartu Pelajar {attempt.identityCardUrls!.length > 1 ? `Anggota ${i+1}` : ''}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
                             {attempt.rejectionReason && (
                               <p className="text-destructive mt-1 bg-destructive/10 p-2 rounded">
                                 <strong>Catatan Penolakan:</strong> {attempt.rejectionReason}
@@ -135,23 +172,67 @@ export function RegistrationList({
           </div>
           
           <div className="md:w-[320px] shrink-0 border-t md:border-t-0 md:border-l border-muted/30 p-6 bg-muted/5 flex flex-col justify-center">
-            {reg.status === 'PENDING_PAYMENT' || reg.status === 'REJECTED' ? (
+            {(() => {
+              const participants = [];
+              if (reg.teamName) {
+                participants.push({ id: 'leader', label: `Ketua (${reg.participantName})` });
+                reg.members?.forEach((m, idx) => {
+                  participants.push({ id: `member-${idx}`, label: `Anggota ${idx + 1} (${m.name})` });
+                });
+              } else {
+                participants.push({ id: 'individual', label: `Peserta (${reg.participantName})` });
+              }
+
+              const expectedFileCount = participants.length;
+              const currentFiles = filesToUpload[reg.id]?.identity?.filter(Boolean) || [];
+              const isUploadReady = filesToUpload[reg.id]?.payment && currentFiles.length === expectedFileCount;
+
+              return reg.status === 'PENDING_PAYMENT' || reg.status === 'REJECTED' ? (
               (!reg.teamName || reg.teamLeaderId === userId) ? (
-                <div className="flex flex-col gap-2 w-full md:w-64">
-                  <Label htmlFor={`payment-${reg.id}`} className="text-xs text-muted-foreground">
-                    Unggah Bukti Pembayaran
-                  </Label>
-                  <div className="flex gap-2">
+                <div className="flex flex-col gap-4 w-full md:w-64">
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor={`payment-${reg.id}`} className="text-xs text-muted-foreground">
+                      1. Unggah Bukti Pembayaran
+                    </Label>
                     <Input 
                       id={`payment-${reg.id}`}
                       type="file" 
                       accept="image/*,.pdf"
                       disabled={uploadingId === reg.id}
-                      className="flex-1"
-                      onChange={(e) => handleUploadPayment(reg.id, e.target.files?.[0])}
+                      className="flex-1 text-xs"
+                      onChange={(e) => handleFileChange(reg.id, 'payment', e.target.files)}
                     />
                   </div>
-                  {uploadingId === reg.id && <span className="text-xs text-muted-foreground animate-pulse">Mengunggah...</span>}
+                  <div className="flex flex-col gap-2 mt-2">
+                    <Label className="text-xs text-muted-foreground font-semibold">
+                      2. Unggah Kartu Pelajar
+                    </Label>
+                    <div className="space-y-3">
+                      {participants.map((p, idx) => (
+                        <div key={p.id} className="flex flex-col gap-1.5 p-2 border rounded-md bg-white">
+                          <Label htmlFor={`identity-${reg.id}-${idx}`} className="text-[10px] font-medium text-primary">
+                            {p.label}
+                          </Label>
+                          <Input 
+                            id={`identity-${reg.id}-${idx}`}
+                            type="file" 
+                            accept="image/*,.pdf"
+                            disabled={uploadingId === reg.id}
+                            className="flex-1 text-[10px] h-7 px-2"
+                            onChange={(e) => handleFileChange(reg.id, 'identity', e.target.files, idx)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    className="mt-2"
+                    disabled={uploadingId === reg.id || !isUploadReady}
+                    onClick={() => handleUploadPayment(reg.id, !!reg.teamName)}
+                  >
+                    {uploadingId === reg.id ? "Mengunggah..." : "Kirim Berkas"}
+                  </Button>
                 </div>
               ) : (
                 <div className="text-xs text-muted-foreground p-3 border rounded bg-muted/20 text-center w-full md:w-64">
@@ -167,10 +248,9 @@ export function RegistrationList({
                   Pembayaran Terverifikasi
                 </div>
                 {reg.whatsappGroupUrl && (
-                  <a
-                    href={reg.whatsappGroupUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={() => window.open(reg.whatsappGroupUrl!, '_blank')}
+                    className="w-full"
                   >
                     <Button
                       variant="outline"
@@ -179,46 +259,54 @@ export function RegistrationList({
                       <MessageCircle className="h-4 w-4" />
                       Gabung Grup WhatsApp Lomba
                     </Button>
-                  </a>
+                  </button>
                 )}
                 <div className="flex flex-col gap-2 mt-2 pt-2 border-t">
                   <p className="text-xs text-muted-foreground font-medium mb-1">Dokumen Peserta:</p>
-                  <a href="/docs/Cetak Kartu Peserta_20260709_190857_0000.pdf" download>
+                  <button onClick={() => setPreviewFile({ url: "/docs/kartu_peserta.pdf", name: "Kartu Peserta" })}>
                     <Button variant="secondary" size="sm" className="w-full justify-start gap-2 text-xs">
                       <Download className="h-3.5 w-3.5" />
                       Unduh Kartu Peserta
                     </Button>
-                  </a>
+                  </button>
                   {reg.competitionName?.toLowerCase().includes("lkti") && (
-                    <a href="/docs/Galaxy Research Odyssey (LKTI).docx" download>
+                    <button onClick={() => setPreviewFile({ url: "/docs/Galaxy_Research_Odyssey_LKTI.docx", name: "Pernyataan Orisinalitas (LKTI)" })}>
                       <Button variant="secondary" size="sm" className="w-full justify-start gap-2 text-xs">
                         <FileText className="h-3.5 w-3.5" />
                         Pernyataan Orisinalitas (LKTI)
                       </Button>
-                    </a>
+                    </button>
                   )}
                   {reg.competitionName?.toLowerCase().includes("video") && (
-                    <a href="/docs/Video Kreatif.docx" download>
+                    <button onClick={() => setPreviewFile({ url: "/docs/Video_Kreatif.docx", name: "Pernyataan Orisinalitas (Video)" })}>
                       <Button variant="secondary" size="sm" className="w-full justify-start gap-2 text-xs">
                         <FileText className="h-3.5 w-3.5" />
                         Pernyataan Orisinalitas (Video)
                       </Button>
-                    </a>
+                    </button>
                   )}
                   {(reg.competitionName?.toLowerCase().includes("vortex") || reg.competitionName?.toLowerCase().includes("poster")) && (
-                    <a href="/docs/VORTEX (DIGITAL POSTER).docx" download>
+                    <button onClick={() => setPreviewFile({ url: "/docs/VORTEX_DIGITAL POSTER.docx", name: "Pernyataan Orisinalitas (Poster)" })}>
                       <Button variant="secondary" size="sm" className="w-full justify-start gap-2 text-xs">
                         <FileText className="h-3.5 w-3.5" />
                         Pernyataan Orisinalitas (Poster)
                       </Button>
-                    </a>
+                    </button>
                   )}
                 </div>
               </div>
-              ) : null}
+              ) : null;
+            })()}
           </div>
         </Card>
       ))}
+      
+      <FilePreviewDialog 
+        isOpen={!!previewFile}
+        onClose={() => setPreviewFile(null)}
+        fileUrl={previewFile?.url || null}
+        fileName={previewFile?.name}
+      />
     </div>
   );
 }

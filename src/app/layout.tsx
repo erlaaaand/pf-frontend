@@ -4,7 +4,7 @@ import "./globals.css"
 import { Toaster } from "@/src/components/ui/sonner"
 import { UserProvider } from "@/src/contexts/user-context"
 import { NotificationProvider } from "@/src/contexts/notification-context"
-import { SmoothScroll } from "@/src/components/landing/SmoothScroll"
+
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-display",
@@ -20,8 +20,8 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Physics Festival 2026",
-    default: "Physics Festival 2026",
+    template: "%s | Physics Festival XXV",
+    default: "Physics Festival XXV",
   },
   description: "Platform resmi untuk pendaftaran dan manajemen perlombaan Physics Festival",
 }
@@ -35,16 +35,15 @@ export default function RootLayout({
     <html
       lang="id"
       className={`${spaceGrotesk.variable} ${plusJakartaSans.variable} h-full antialiased`}
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col" style={{ fontFamily: "var(--font-body, sans-serif)" }}>
-        <SmoothScroll>
           <UserProvider>
             <NotificationProvider>
               {children}
             </NotificationProvider>
           </UserProvider>
-        </SmoothScroll>
         <Toaster position="bottom-right" richColors />
       </body>
     </html>

@@ -22,15 +22,15 @@ export default function ForgotPasswordPage() {
         </div>
       </div>
       <div className="relative hidden bg-gradient-to-br from-[#2C2621] to-[#1a1613] lg:flex lg:flex-col lg:items-center lg:justify-center p-12 border-l border-white/5">
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay pointer-events-none" />
+
         <div className="relative w-full max-w-md aspect-square">
           <Image
             src="/mascot/velune.png"
             alt="Velune Mascot"
+            priority
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-contain drop-shadow-[0_0_30px_rgba(234,191,106,0.15)] animate-[float_6s_ease-in-out_infinite]"
-            priority
           />
         </div>
         <div className="mt-8 text-center text-[#F7F5F0] relative z-10 max-w-md">

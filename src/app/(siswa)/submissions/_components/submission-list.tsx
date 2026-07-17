@@ -18,6 +18,7 @@ import { Input } from "@/src/components/ui/input";
 import { Textarea } from "@/src/components/ui/textarea";
 import { FileTextIcon } from "lucide-react";
 import axios from "axios";
+import { FilePreviewDialog } from "@/src/components/ui/file-preview-dialog";
 
 interface ErrorResponse {
   message: string;
@@ -40,6 +41,7 @@ export function SubmissionList({
   const [file, setFile] = useState<File | null>(null);
   const [originalityFile, setOriginalityFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [previewFile, setPreviewFile] = useState<{ url: string; name: string; } | null>(null);
 
   async function handleSubmitForm(e: React.FormEvent, regId: string) {
     e.preventDefault();
@@ -136,7 +138,7 @@ export function SubmissionList({
                   <div className="flex items-center gap-4 pt-2">
                     <Button 
                       variant="outline" 
-                      onClick={() => window.open(sub.fileUrl, "_blank", "noopener,noreferrer")}
+                      onClick={() => setPreviewFile({ url: sub.fileUrl, name: `Karya - ${sub.title}` })}
                     >
                       <FileTextIcon className="size-4 mr-2" />
                       Lihat Karya
@@ -145,7 +147,7 @@ export function SubmissionList({
                       <Button 
                         variant="outline" 
                         className="text-amber-600 border-amber-300 hover:bg-amber-50"
-                        onClick={() => window.open(sub.originalityFileUrl!, "_blank", "noopener,noreferrer")}
+                        onClick={() => setPreviewFile({ url: sub.originalityFileUrl!, name: `Orisinalitas - ${sub.title}` })}
                       >
                         <FileTextIcon className="size-4 mr-2" />
                         Tanda Orisinalitas
@@ -168,6 +170,16 @@ export function SubmissionList({
                 <div className="space-y-4">
                   {activeRegId === reg.id ? (
                     <form onSubmit={(e) => handleSubmitForm(e, reg.id)} className="space-y-4 border p-4 rounded-md">
+                      {reg.competitionName.toLowerCase().includes("video") && (
+                        <div className="bg-blue-50/50 border border-blue-200 text-blue-800 p-4 rounded-xl text-sm mb-2 shadow-sm">
+                          <strong>📝 Panduan Khusus Lomba Video Kreatif:</strong><br />
+                          <span className="opacity-90">
+                            Mohon <span className="font-semibold text-red-600">JANGAN</span> mengunggah file video mentah (mp4/mkv) ke dalam sistem ini. 
+                            Silakan unggah dokumen berformat <strong>PDF</strong> atau <strong>Word</strong> yang memuat format laporan: 
+                            <br/>• Nama Kelompok<br/>• Daftar Anggota<br/>• Asal Sekolah<br/>• <strong>Tautan (Link) Video</strong> (Google Drive / YouTube).
+                          </span>
+                        </div>
+                      )}
                       <div className="space-y-2">
                         <Label>Judul Karya</Label>
                         <Input 
@@ -232,6 +244,13 @@ export function SubmissionList({
           </Card>
         );
       })}
+
+      <FilePreviewDialog 
+        isOpen={!!previewFile}
+        onClose={() => setPreviewFile(null)}
+        fileUrl={previewFile?.url || null}
+        fileName={previewFile?.name}
+      />
     </div>
   );
 }
