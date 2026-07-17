@@ -23,8 +23,12 @@ export interface Submission {
   originalityFileUrl?: string | null;
   submittedAt: string;
   participantName?: string;
-  teamName?: string;
+  participantAvatar?: string | null;
   participantEmail?: string;
+  participantPhone?: string | null;
+  teamName?: string;
+  institution?: string | null;
+  members?: { name: string; avatar: string | null; email: string | null; phone: string | null }[];
 }
 
 // ── Payload (Request Body) ──────────────────────────────────────────────────

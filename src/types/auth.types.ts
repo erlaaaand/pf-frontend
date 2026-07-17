@@ -18,6 +18,7 @@ export interface RegisterPayload {
   fullName: string;
   phoneNumber: string;
   institution: string;
+  npsn?: string;
 }
 
 /** Body untuk POST /auth/login */
@@ -47,6 +48,7 @@ export interface ResetPasswordPayload {
 export interface UpdateUserPayload {
   fullName?: string;
   institution?: string;
+  npsn?: string;
   /** Wajib diisi bersamaan dengan newPassword jika ingin ganti password */
   currentPassword?: string;
   /** Wajib diisi bersamaan dengan currentPassword jika ingin ganti password */
@@ -85,7 +87,8 @@ export interface AuthUser {
 /** Response dari POST /auth/login, /auth/register (via verify), /auth/verify-email */
 export interface AuthResponse {
   message: string;
-  user: CurrentUserPayload; // Menggunakan CurrentUserPayload agar lebih seragam dengan getMe()
+  user: AuthUser; 
+  accessToken?: string;
 }
 
 /** Response dari GET /auth/me (langsung dari payload JWT, bukan query DB) */
@@ -105,6 +108,7 @@ export interface User {
   avatarUrl: string | null;
   phoneNumber: string;
   institution: string;
+  npsn: string | null;
   role: UserRole;
   isActive: boolean;
   createdAt: string;
